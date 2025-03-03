@@ -19,6 +19,8 @@ Shader::Shader()
     m_vertexShaderID = 0;
     m_fragmentShaderID = 0;
     m_texID0 = 0;
+    m_texID1 = 0;
+    m_texID2 = 0;
 }
 
 bool Shader::CreateProgram()
@@ -256,10 +258,36 @@ bool Shader::SendUniformData(const std::string& uniformName, const glm::vec3 dat
     return true;
 }
 
-bool Shader::SendTextureData(const std::string& texturePath)
+bool Shader::CreateTexture0(const std::string& texturePath)
 {
-    glGenTextures(1, &m_texID0);
-    glBindTexture(GL_TEXTURE_2D, m_texID0);
+    GLint id = 0;
+    LoadTextureData(texturePath, m_texID0);
+    SendUniformData("tex0", id);
+    return true;
+}
+
+bool Shader::CreateTexture1(const std::string& texturePath)
+{
+    GLint id = 1;
+    LoadTextureData(texturePath, m_texID1);
+    SendUniformData("tex1", id);
+    return true;
+
+}
+
+bool Shader::CreateTexture2(const std::string& texturePath)
+{
+    GLint id = 2;
+    LoadTextureData(texturePath, m_texID2);
+    SendUniformData("tex2", id);
+    return true;
+
+}
+
+bool Shader::LoadTextureData(const std::string& texturePath, GLuint& texID)
+{
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -287,12 +315,23 @@ bool Shader::SendTextureData(const std::string& texturePath)
 
 GLuint Shader::GetShaderProgramID()
 {
+
     return m_shaderProgramID;
 }
 
 GLuint Shader::GetTextureID0()
 {
     return m_texID0;
+}
+
+GLuint Shader::GetTextureID1()
+{
+    return m_texID1;
+}
+
+GLuint Shader::GetTextureID2()
+{
+    return m_texID2;
 }
 
 

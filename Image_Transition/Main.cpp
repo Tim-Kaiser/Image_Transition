@@ -38,9 +38,17 @@ int main(int argc, char* arfv[]) {
 	// "Textures/Frame_snow.png"
 	// "Textures/Frame_forest.png"
 	// "Textures/Frame_fire.png"
-	if (!Shader::Instance()->SendTextureData("Textures/hubble-eyes-galactic-refurbishment_17322896925_o.jpg")) {
+	// "Textures/hubble-eyes-galactic-refurbishment_17322896925_o.jpg"
+	if (!Shader::Instance()->CreateTexture1("Textures/milkyway_earth.jpg")) {
 		return 0;
 	}
+	if (!Shader::Instance()->CreateTexture0("Textures/Frame_sticker.png")) {
+		return 0;
+	}
+	if (!Shader::Instance()->CreateTexture2("Textures/Frame_snow.png")) {
+		return 0;
+	}
+
 
 
 
