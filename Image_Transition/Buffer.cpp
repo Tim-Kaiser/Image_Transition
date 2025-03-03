@@ -72,6 +72,15 @@ void Buffer::LinkBuffer(const std::string& attribute, VBOType vboType, Component
 
 void Buffer::Draw(DrawType drawType)
 {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Shader::Instance()->GetTextureID0());
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, Shader::Instance()->GetTextureID1());
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, Shader::Instance()->GetTextureID2());
+
 	glBindVertexArray(m_vertexArrayObj);
 	glDrawArrays(drawType, 0, m_vertexCount);
 	glBindVertexArray(0);

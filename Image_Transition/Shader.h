@@ -17,6 +17,10 @@ private:
 	GLuint m_shaderProgramID;
 	GLuint m_vertexShaderID;
 	GLuint m_fragmentShaderID;
+	GLuint m_texID0;
+	GLuint m_texID1;
+	GLuint m_texID2;
+
 
 
 public:
@@ -25,6 +29,9 @@ public:
 	static Shader* Instance();
 
 	GLuint GetShaderProgramID();
+	GLuint GetTextureID0();
+	GLuint GetTextureID1();
+	GLuint GetTextureID2();
 
 	bool CreateProgram();
 	bool CreateShaders();
@@ -49,6 +56,13 @@ public:
 
 	bool SendUniformData(const std::string& uniformName, const glm::mat4& data);
 	bool SendUniformData(const std::string& uniformName, const glm::vec3 data);
+
+
+	bool CreateTexture0(const std::string& texturePath);
+	bool CreateTexture1(const std::string& texturePath);
+	bool CreateTexture2(const std::string& texturePath);
+
+	bool LoadTextureData(const std::string& texturePath, GLuint& texID);
 
 
 };
