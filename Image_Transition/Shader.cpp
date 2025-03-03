@@ -1,6 +1,9 @@
 #pragma once
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <fstream>
 #include <iostream>
+#include "stb_image.h"
 #include "Shader.h"
 
 
@@ -15,6 +18,7 @@ Shader::Shader()
     m_shaderProgramID = 0;
     m_vertexShaderID = 0;
     m_fragmentShaderID = 0;
+    m_texID0 = 0;
 }
 
 bool Shader::CreateProgram()
@@ -252,9 +256,43 @@ bool Shader::SendUniformData(const std::string& uniformName, const glm::vec3 dat
     return true;
 }
 
+bool Shader::SendTextureData(const std::string& texturePath)
+{
+    glGenTextures(1, &m_texID0);
+    glBindTexture(GL_TEXTURE_2D, m_texID0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    stbi_set_flip_vertically_on_load(true);
+
+    int width, height, channels;
+    unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &channels, 0);
+    if (data)
+    {
+        GLuint format = channels == 3 ? GL_RGB : GL_RGBA;
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else 
+    {
+        return false;
+    }
+    stbi_image_free(data);
+
+    return true;
+}
+
 GLuint Shader::GetShaderProgramID()
 {
     return m_shaderProgramID;
+}
+
+GLuint Shader::GetTextureID0()
+{
+    return m_texID0;
 }
 
 

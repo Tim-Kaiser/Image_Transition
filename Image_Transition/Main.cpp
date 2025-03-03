@@ -33,6 +33,14 @@ int main(int argc, char* arfv[]) {
 	if (!Shader::Instance()->LinkProgram()) {
 		return 0;
 	}
+	// "Textures/milkyway_earth.jpg"
+	// "Textures/Frame_sticker.png"
+	// "Textures/Frame_snow.png"
+	// "Textures/Frame_forest.png"
+	// "Textures/Frame_fire.png"
+	if (!Shader::Instance()->SendTextureData("Textures/hubble-eyes-galactic-refurbishment_17322896925_o.jpg")) {
+		return 0;
+	}
 
 
 
