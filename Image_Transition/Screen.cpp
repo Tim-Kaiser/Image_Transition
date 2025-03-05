@@ -15,6 +15,16 @@ Screen* Screen::Instance()
     return screen;
 }
 
+ScreenDimensions Screen::getDims()
+{
+    SDL_DisplayMode DM;
+    SDL_GetCurrentDisplayMode(0, &DM);
+    auto Width = DM.w;
+    auto Height = DM.h;
+
+    return ScreenDimensions(Width, Height);
+}
+
 bool Screen::Init()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) == -1) {
@@ -66,7 +76,8 @@ bool Screen::Init()
 
 void Screen::Clear()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Screen::SwapBuf()

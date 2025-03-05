@@ -49,6 +49,23 @@ int main(int argc, char* arfv[]) {
 		return 0;
 	}
 
+	GLuint fBuffer;
+	glGenFramebuffers(1, &fBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, fBuffer);
+	GLuint fCol;
+
+	ScreenDimensions dims = Screen::Instance()->getDims();
+
+	glGenTextures(1, &fCol);
+	glBindTexture(GL_TEXTURE_2D, fCol);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, dims.width, dims.height, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fCol, 0);
+
+	GLuint attachments[1] = {GL_COLOR_ATTACHMENT0};
+	glDrawBuffers(1, attachments);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
@@ -58,10 +75,21 @@ int main(int argc, char* arfv[]) {
 
 	while (running) {
 		Screen::Instance()->Clear();
+		glEnable(GL_DEPTH_TEST);
 		Input::Instance()->Update();
 		if (Input::Instance()->isXClicked()) {
 			running = false;
 		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fBuffer);
+		quad.Render();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		Screen::Instance()->Clear();
+		glDisable(GL_DEPTH_TEST);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, fCol);
 
 		quad.Render();
 
