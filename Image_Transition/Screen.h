@@ -2,6 +2,12 @@
 
 #include <SDL.h>
 
+struct ScreenDimensions
+{
+	int width;
+	int height;
+};
+
 class Screen {
 private:
 	SDL_Window* window;
@@ -13,6 +19,7 @@ private:
 
 public:
 	static Screen* Instance();
+	ScreenDimensions getDims();
 	bool Init();
 	void Clear();
 	void SwapBuf();
