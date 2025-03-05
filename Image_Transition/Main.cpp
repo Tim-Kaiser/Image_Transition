@@ -80,8 +80,6 @@ int main(int argc, char* arfv[]) {
 		if (Input::Instance()->isXClicked()) {
 			running = false;
 		}
-		//glActiveTexture(GL_TEXTURE3);
-		//glBindTexture(GL_TEXTURE_2D, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fBuffer);
 		quad.Render();
