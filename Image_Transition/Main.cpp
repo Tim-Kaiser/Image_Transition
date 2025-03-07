@@ -115,14 +115,16 @@ int main(int argc, char* arfv[]) {
 	glUseProgram(simulationShader->m_shaderProgramID);
 	GLint texSimInID = 0;
 	GLint setup = 1;
+	GLfloat factor = 0.01f;
 	shaderLoader.SendUniformData("texSimIn", texSimInID);
 	shaderLoader.SendUniformData("setup", setup);
+	shaderLoader.SendUniformData("factor", factor);
 
 
 
 	// == TEXTURE READ SIM ==
 	std::string texPath0 = "Textures/Frame_sticker.png";
-	std::string texPath1 = "Textures/hubble-eyes-galactic-refurbishment_17322896925_o.jpg";
+	std::string texPath1 = "Textures/Frame_snow.png";
 	GLuint texID0, texID1;
 	genTexture(texPath0, texID0);
 	genTexture(texPath1, texID1);
@@ -135,6 +137,9 @@ int main(int argc, char* arfv[]) {
 	shaderLoader.SendUniformData("startFrame", ID_1);
 	shaderLoader.SendUniformData("endFrame", ID_2);
 
+	int setupFrameCount = 0;
+
+	double startTime = glfwGetTime();
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	while (window.Open()) {
@@ -142,6 +147,11 @@ int main(int argc, char* arfv[]) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(simulationShader->m_shaderProgramID);
+
+		GLfloat timeSinceStart = (float(glfwGetTime()) - float(startTime));
+		shaderLoader.SendUniformData("time", timeSinceStart );
+
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texSimIn);
 		glActiveTexture(GL_TEXTURE1);
@@ -158,8 +168,17 @@ int main(int argc, char* arfv[]) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		setup = 0;
-		shaderLoader.SendUniformData("setup", setup);
+		if (setupFrameCount > 120)
+		{
+			setup = 0;
+			shaderLoader.SendUniformData("setup", setup);
+		}
+		if (timeSinceStart > 45.0f)
+		{
+			factor = 0.20;
+			shaderLoader.SendUniformData("factor", factor);
+		}
+
 
 		glUseProgram(renderShader->m_shaderProgramID);
 		glActiveTexture(GL_TEXTURE0);
@@ -171,6 +190,7 @@ int main(int argc, char* arfv[]) {
 		glCopyImageSubData(texSimOut, GL_TEXTURE_2D, 0, 0, 0, 0, texSimIn, GL_TEXTURE_2D, 0, 0, 0, 0, width, height, 1);
 
 		window.Update();
+		setupFrameCount = setupFrameCount + 1;
 	}
 
 	shaderLoader.DetachShaders(*renderShader);

@@ -7,11 +7,23 @@ uniform sampler2D startFrame;
 uniform sampler2D endFrame;
 
 uniform int setup;
-
+uniform float factor;
+uniform float time;
 
 layout (location = 0) out vec4 texSimOut;
 
 out vec4 fragCol;
+
+#define color_dark vec4(25.0, 54.0,52.0 ,255.0)
+#define color_light vec4(159.0, 201.0, 196.0,255.0)
+#define color_grey vec4(69.0, 92.0, 84.0,255.0)
+
+
+
+float snoise(in vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453)-.1;
+}
+
 
 
 float getNeighborValue()
@@ -20,101 +32,18 @@ float getNeighborValue()
 
 	float neighborAliveCount = 0.;
 
-	neighborAliveCount += texelFetch(texSimIn, ivec2(texCoord) + ivec2(1.,0.), 0).r;
-	neighborAliveCount += texelFetch(texSimIn, ivec2(texCoord) + ivec2(-1.,0.), 0).r;
-	neighborAliveCount += texelFetch(texSimIn, ivec2(texCoord) + ivec2(0.,1.), 0).r;
-	neighborAliveCount += texelFetch(texSimIn, ivec2(texCoord) + ivec2(0.,-1.), 0).r;
+	neighborAliveCount += float( texelFetch(texSimIn, ivec2(texCoord) + ivec2(1.,0.), 0).r > 0.);
+	neighborAliveCount += float( texelFetch(texSimIn, ivec2(texCoord) + ivec2(-1.,0.), 0).r > 0.);
+	neighborAliveCount += float( texelFetch(texSimIn, ivec2(texCoord) + ivec2(0.,1.), 0).r > 0.);
+	neighborAliveCount += float( texelFetch(texSimIn, ivec2(texCoord) + ivec2(0.,-1.), 0).r > 0.);
 
-	neighborAliveCount += texelFetch(texSimIn, ivec2(texCoord) + ivec2(1.,1.), 0).r;
-	neighborAliveCount += texelFetch(texSimIn, ivec2(texCoord) + ivec2(1.,-1.), 0).r;
-	neighborAliveCount += texelFetch(texSimIn, ivec2(texCoord) + ivec2(-1.,1.), 0).r;
-	neighborAliveCount += texelFetch(texSimIn, ivec2(texCoord) + ivec2(-1.,-1.), 0).r;
+	neighborAliveCount += float( texelFetch(texSimIn, ivec2(texCoord) + ivec2(1.,1.), 0).r > 0.);
+	neighborAliveCount += float( texelFetch(texSimIn, ivec2(texCoord) + ivec2(1.,-1.), 0).r > 0.);
+	neighborAliveCount += float( texelFetch(texSimIn, ivec2(texCoord) + ivec2(-1.,1.), 0).r > 0.);
+	neighborAliveCount += float( texelFetch(texSimIn, ivec2(texCoord) + ivec2(-1.,-1.), 0).r > 0.);
 	
 	return neighborAliveCount;
 }
-
-bool isAlive()
-{
-	bool currentlyAlive = false;
-	if(texture(texSimIn, vUv).x > 0.9)
-	{
-		currentlyAlive = true;
-	}
-
-	float neighborAliveCount = getNeighborValue();
-
-	if(currentlyAlive)
-	{
-		if((neighborAliveCount > 1.9 && neighborAliveCount < 2.2))
-			{
-				return true;
-			}
-	}else
-	{
-		if((neighborAliveCount > 1.9 && neighborAliveCount < 2.5))
-		{
-			return true;
-		}
-	}
-	return false;
-
-#if 0
-	if(currentlyAlive)
-	{
-		if(neighborAliveCount < 2.0)
-		{
-			return false;
-		}
-		else if((neighborAliveCount > 2.5 && neighborAliveCount < 3.5) || (neighborAliveCount > 5.5 && neighborAliveCount < 6.5))
-		{
-			return true;
-		}
-		else{
-			return false;
-		}
-	
-	}else{
-		if((neighborAliveCount > 2.5 && neighborAliveCount < 3.5) || (neighborAliveCount > 5.5 && neighborAliveCount < 6.5))
-		{
-			return true;
-		}
-		else{
-			return false;
-		}
-	}
-#endif
-#if 0
-	if(neighborAliveCount < 2.0)
-	{
-		return false;
-	}
-	if(neighborAliveCount == 3)
-	{
-		return true;
-	}
-	if(neighborAliveCount == 2 && currentlyAlive)
-	{
-		return true;
-	}
-	if(neighborAliveCount == 6 && !currentlyAlive)
-	{
-		return true;
-	}
-	return false;
-#endif
-}
-
-vec3 getDecayColor()
-{
-	vec3 decayed = (texture(texSimIn, vUv).xyz) * vec3(0.5);
-
-	if(decayed.x < 0.1)
-	{
-		decayed = vec3(0.);
-	}
-	return decayed;
-}
-
 
 void main(){
 
@@ -124,35 +53,30 @@ void main(){
 
 	if(setup == 1)
 	{
-		texSimOut = vec4(startTexCol.xyz, 1.);
+		vec4 noise = vec4(snoise(vUv) > 0.8 ? 1.0 : 0.0);
+		texSimOut = vec4(startTexCol.x > 0.1 ? 1.0 : 0.0);
 	}else{
-		vec4 finalColor = vec4(0.);
+		float finalColor = prevFrameCol.x;
 
-		if(isAlive())
-		{
-			finalColor = vec4(1.);
-		}else
-		{
-			finalColor = vec4(getDecayColor(), 1.);
-		}
+		float neighborAliveCount = getNeighborValue();
 
+		// resurect if we are not live, and have 3 live neighrbours
+        finalColor += (1.0-float(prevFrameCol.x > 0.0)) * float(neighborAliveCount == 3.0);
 
-		//if(prevFrameCol.x > 0.9 && goalTexCol.x > 0.9)
-		//{
-		//	finalColor = vec4(1.);
-		//}
-		//else if(isAlive())
-		//{
-		//	finalColor = vec4(1., 1., 1., 1.);
-		//}else
-		//{
-			//finalColor = vec4(getDecayColor(), 1.);
-		//}
-		//finalColor = vec4(1., 0.,0., 1.);
-		vec4 addCol = vec4(0.001, 0.,0.,1.) + texture(endFrame, vUv) * 0.001;
-		vec4 col = finalColor + addCol; 
+        // kill if we do not have either 3 or 2 neighbours
+        finalColor *= min(float(neighborAliveCount == 2.0) + float(neighborAliveCount == 3.0) + float(neighborAliveCount == 6.0), 1.);
 
+		float isNotPartOfGoalTex = float(goalTexCol.x < 0.1);
+		float isPartOfGoalTex = float(goalTexCol.x > 0.3);
+		float isEnd = float(factor > 0.1);
 
-		texSimOut = finalColor;
+		finalColor -= isNotPartOfGoalTex * factor;
+
+		
+		finalColor += isEnd * (isPartOfGoalTex * 0.2);
+
+		finalColor = clamp(finalColor, 0., 1.);
+
+		texSimOut = vec4(vec3(finalColor), 1.);
 	}
 }
